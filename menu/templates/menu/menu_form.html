@@ -10,7 +10,7 @@
     left: -9999px;
   }
 </style>
-<div class="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<div class="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8 rounded-3xl bg-gray-100  ">
   <div class="w-full max-w-md space-y-8 px-5">
     <div>
       <h2 class="text-center text-3xl font-bold tracking-tight text-gray-900">Create Menu</h2>
@@ -19,17 +19,17 @@
       {% csrf_token %}
       <div class="col-span-6 sm:col-span-4">
         <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
-        <input type="text" id="name" name="name" required class="mt-2 px-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+        <input type="text" id="name" name="name" required class="mt-2 px-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" value="{{ menu.name }}">
       </div>
       <div>
         <label for="description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
         <div class="mt-2">
-          <textarea id="description" name="description" rows="3" class="mt-1 px-3 block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:py-1.5 sm:text-sm sm:leading-6"></textarea>
+          <textarea id="description" name="description" rows="3" class="mt-1 px-3 block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:py-1.5 sm:text-sm sm:leading-6">{{ menu.description }}</textarea>
         </div>
       </div>
       <div class="col-span-6 sm:col-span-4">
         <label for="price" class="block text-sm font-medium leading-6 text-gray-900">Price</label>
-        <input placeholder="Rs" type="number" id="price" name="price" required class="mt-2 px-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+        <input placeholder="Rs" type="number" id="price" name="price" required class="mt-2 px-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" value="{{ menu.price }}">
       </div>
 
       <div>
@@ -56,26 +56,28 @@
         <select id="category" name="category" class="mt-2 px-2 block w-full rounded-md border-0 bg-white py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
           <option value="">Select the category</option>
           {% for category in categories %}
-            <option value="{{ category.id }}">{{ category.name }}</option>
+            <option value="{{ category.id }}" {% if category.id == menu.category.id %} selected {% endif %}>{{ category.name }}</option>
           {% endfor %}
         </select>
       </div>
 
       <div class="flex items-center">
-        <input id="available" name="available" type="checkbox" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600">
+        <input id="available" name="available" type="checkbox" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600" {% if menu.available %} checked {% endif %}>
         <label for="available" class="ml-3 block text-sm font-medium leading-6 text-gray-900">Available</label>
       </div>
       
       <div class="col-span-6 sm:col-span-4">
         <label for="preparation_time" class="block text-sm font-medium leading-6 text-gray-900">Preparation Time (minutes)</label>
-        <input type="number" class="mt-1 px-3 block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:py-1.5 sm:text-sm sm:leading-6" id="preparation_time" name="preparation_time">
+        <input type="number" class="mt-1 px-3 block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:py-1.5 sm:text-sm sm:leading-6" id="preparation_time" name="preparation_time" value={{menu.preparation_time}}>
       </div>
 
       <div class="col-span-6 sm:col-span-3">
         <label for="ingredients" class="block text-sm font-medium leading-6 text-gray-900">Ingredients</label>
         <select id="ingredients" name="ingredients" class="block form-multiselect mt-2 px-2 block w-full rounded-md border-0 bg-white py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" multiple>
           {% for ingredient in ingredients %}
-            <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+            <option value="{{ ingredient.id }}" {% if ingredient in menu.ingredients.all %} selected {% endif %}>
+                {{ ingredient.name }}
+            </option>
           {% endfor %}
         </select>
       </div>
@@ -83,21 +85,21 @@
       <div class="flex items-center">
         <label class="mr-2">Rating</label>
         <div class="flex">
-          <input type="radio" id="rating" name="rating" value="5" class="hidden" />
+          <input type="radio" id="rating" name="rating" value="5" class="hidden" {% if menu.rating == 5 %}checked{% endif %} />
           <label for="star5" class="text-2xl text-yellow-500 cursor-pointer">&#9733;</label>
-          <input type="radio" id="rating" name="rating" value="4" class="hidden" />
+          <input type="radio" id="rating" name="rating" value="4" class="hidden" {% if existing_rating == 4 %}checked{% endif %} />
           <label for="star4" class="text-2xl text-yellow-500 cursor-pointer">&#9733;</label>
-          <input type="radio" id="rating" name="rating" value="3" class="hidden" />
+          <input type="radio" id="rating" name="rating" value="3" class="hidden" {% if existing_rating == 3 %}checked{% endif %} />
           <label for="star3" class="text-2xl text-yellow-500 cursor-pointer">&#9733;</label>
-          <input type="radio" id="rating" name="rating" value="2" class="hidden" />
+          <input type="radio" id="rating" name="rating" value="2" class="hidden" {% if existing_rating == 2 %}checked{% endif %} />
           <label for="star2" class="text-2xl text-yellow-500 cursor-pointer">&#9733;</label>
-          <input type="radio" id="rating" name="rating" value="1" class="hidden" />
+          <input type="radio" id="rating" name="rating" value="1" class="hidden" {% if existing_rating == 1 %}checked{% endif %} />
           <label for="star1" class="text-2xl text-yellow-500 cursor-pointer">&#9733;</label>
         </div>
       </div>
       
       <div class="flex items-center">
-        <input type="checkbox" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600" id="specials" name="specials">
+        <input type="checkbox" class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600" id="specials" name="specials" {% if menu.specials %} checked {% endif %}>
         <label class="ml-3 block text-sm font-medium leading-6 text-gray-900" for="specials">Specials</label>
       </div>
       <button type="submit" class="inline-flex justify-center rounded-md bg-indigo-600 py-2 px-5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 w-full">Create</button>

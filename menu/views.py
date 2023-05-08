@@ -58,7 +58,21 @@ class MenuUpdateView(UpdateView):
     model = Menu
     form_class = MenuForm
     success_url = reverse_lazy('menu_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['ingredients'] = Ingredient.objects.all()
+        return context
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_object()
+        return kwargs
 
 class MenuDeleteView(DeleteView):
     model = Menu
     success_url = reverse_lazy('menu_list')
+
+class DashboardView(TemplateView):
+    template_name = "dashboard.html"

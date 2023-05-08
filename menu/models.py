@@ -32,3 +32,17 @@ class Menu(models.Model):
     
     def __str__(self):
         return self.name
+    
+    @property
+    def availability(self):
+        if self.available:
+            return "Available"
+        else:
+            return "Not-Available"
+        
+    @property
+    def speciality(self):
+        if self.specials:
+            return "Yes"
+        else:
+            return "No"

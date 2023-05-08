@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'menu',
     'frontend',
+    'order_management',
+    'hr_management',
 ]
 
 MIDDLEWARE = [
