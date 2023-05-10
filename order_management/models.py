@@ -21,6 +21,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     delivery_address = models.TextField(blank=True, null=True)
+    payment_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Order {self.id}'

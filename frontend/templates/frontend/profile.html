@@ -1,0 +1,143 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<style>
+    .slider_section .detail-box::before {
+    content: "";
+    position: absolute;
+    left: -41%;
+    top: 26px;
+    width: 30%;
+    height: 5px;
+    background-color: transparent;
+}
+slider_section #carouselExampleIndicators {
+    height: auto !important;
+    background: transparent !important;
+}
+</style>
+
+<div class="hero_area">
+    <!-- header section strats -->
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container">
+          <a class="navbar-brand" href="index.html">
+            <img src="images/logo.png" alt="" />
+            <span>
+              Panda
+            </span>
+          </a>
+
+          <div class="navbar-collapse" id="">
+            <div class="custom_menu-btn">
+              <button onclick="openNav()">
+                <span class="s-1"> </span>
+                <span class="s-2"> </span>
+                <span class="s-3"> </span>
+              </button>
+            </div>
+            <div id="myNav" class="overlay">
+              <div class="overlay-content">
+                <a href="/">HOME</a>
+                <a href="about.html">ABOUT</a>
+                <a href="food.html">Food</a>
+                <a href="/profile/">Profile</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- end header section -->
+    <!-- slider section -->
+    <section class=" slider_section position-relative">
+      <div class="side_heading">
+        <h5>
+          G
+          o
+          o
+          d
+          F
+          o
+          o
+          d
+        </h5>
+      </div>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-3 col-md-4 offset-md-1" style="background: transparent !important;">
+            <div id="carouselExampleIndicators" class="carousel slide " data-ride="carousel" style="background: transparent !important;height: 27rem;">
+              <div class="carousel-inner">
+                <div class="carousel-item active">
+                  <div class="img-box b-1">
+                    <img src="{{ user.profile.image.url }}" alt="" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class=" col-md-5 offset-md-1">
+            <div class="detail-box">
+              <h2 style="text-transform: capitalize;">
+                {{ user.first_name }} {{ user.last_name }}
+              </h2>
+              <div style="display:flex;margin-top:1rem;">
+                <div class="" style="height:1rem;font-size: smaller;padding-right: 1rem;">
+                    <img src="{% static 'images/envelope.png' %}" style="height:1rem;" alt="">
+                  </div>
+                  <div>
+                    <h6>
+                        {{user.email}}
+                      </h6>
+                  </div>
+              </div>
+              <div style="display:flex;margin-top:1rem;">
+                <div class="" style="height:1rem;font-size: smaller;padding-right: 1rem;">
+                    <img src="{% static 'images/location.png' %}" style="height:1rem;" alt="">
+                  </div>
+                  <div>
+                    <h6>
+                        Union PLace, Colombo
+                      </h6>
+                  </div>
+              </div>
+              <div style="display:flex;margin-top:1rem;">
+                <div class="" style="height:1rem;font-size: smaller;padding-right: 1rem;">
+                    <img src="{% static 'images/call.png' %}" style="height:1rem;" alt="">
+                  </div>
+                  <div>
+                    <h6>
+                        077 2316543
+                      </h6>
+                  </div>
+              </div>
+
+              <div class="btn-box">
+                <a href="" class="btn-1">
+                  Update Profile
+                </a>
+                <a href="" class="btn-2">
+                  View Orders
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- end slider section -->
+  </div>
+
+
+{% endblock %}

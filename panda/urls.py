@@ -20,6 +20,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("accounts/", include("django.contrib.auth.urls")),
     path('dashboard/', include('menu.urls')),
      path('order/', include('order_management.urls')),
     path('', include('frontend.urls')),

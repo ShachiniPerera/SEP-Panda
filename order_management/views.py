@@ -11,11 +11,15 @@ class OrderListView(ListView):
     template_name = 'order_list.html'
     context_object_name = 'orders'
     
-    
-def update_status(request, order_id):
+
+@csrf_exempt
+def update_status(request):
     if request.method == 'POST':
-        status = request.POST.get('status')
-        order = Order.objects.get(id=order_id)
+        data = json.loads(request.body.decode('utf-8'))
+        print("***", data)
+        orderId = data.get('orderId')
+        status = data.get('newStatus')
+        order = Order.objects.get(id=orderId)
         order.status = status
         order.save()
         return JsonResponse({'success': True})
