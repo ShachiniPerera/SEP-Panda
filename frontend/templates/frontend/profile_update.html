@@ -1,0 +1,112 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+{% block content %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<style>
+    .slider_section .detail-box::before {
+    content: "";
+    position: absolute;
+    left: -41%;
+    top: 26px;
+    width: 30%;
+    height: 5px;
+    background-color: transparent;
+}
+slider_section #carouselExampleIndicators {
+    height: auto !important;
+    background: transparent !important;
+}
+</style>
+
+<div class="hero_area" style="margin-bottom: 15rem;">
+    <!-- header section strats -->
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container">
+          <a class="navbar-brand" href="/">
+            <img src="images/logo.png" alt="" />
+            <span>
+              Panda
+            </span>
+          </a>
+
+          <div class="navbar-collapse" id="">
+            <div class="custom_menu-btn">
+              <button onclick="openNav()">
+                <span class="s-1"> </span>
+                <span class="s-2"> </span>
+                <span class="s-3"> </span>
+              </button>
+            </div>
+            <div id="myNav" class="overlay">
+              <div class="overlay-content">
+                <a href="/">HOME</a>
+                <a href="about.html">ABOUT</a>
+                <a href="/foods/">Food</a>
+                <a href="/profile/">Profile</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- end header section -->
+    <!-- slider section -->
+    <section class=" slider_section position-relative">
+      <div class="side_heading">
+        <h5>
+          G
+          o
+          o
+          d
+          F
+          o
+          o
+          d
+        </h5>
+      </div>
+
+    </section>
+    <!-- end slider section -->
+  </div>
+
+      <div class="container-fluid" style="position: absolute;top: 0;">
+        <div class="row">
+          <div class="col-lg-10 col-md-8 offset-md-1" style="background: transparent !important; margin-left:15rem">
+          <div class=" col-md-5 offset-md-1 ">
+            <div class="detail-box">
+                <div class="container mt-5">
+                    <h2>Update Profile</h2>
+                    <hr>
+                    <form method="post" enctype="multipart/form-data" id="update-form">
+                    {% csrf_token %}
+                    {{ user_form.as_p }}
+                    {{ profile_form.as_p }}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+
+  <script>
+    $(document).ready(function() {
+      $("#update-form input").addClass("form-control");
+    });
+    $(document).ready(function() {
+      $("#update-form textarea").addClass("form-control");
+    });
+  </script>
+{% endblock %}

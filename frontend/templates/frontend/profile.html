@@ -26,7 +26,7 @@ slider_section #carouselExampleIndicators {
     <header class="header_section">
       <div class="container-fluid">
         <nav class="navbar navbar-expand-lg custom_nav-container">
-          <a class="navbar-brand" href="index.html">
+          <a class="navbar-brand" href="/">
             <img src="images/logo.png" alt="" />
             <span>
               Panda
@@ -45,7 +45,7 @@ slider_section #carouselExampleIndicators {
               <div class="overlay-content">
                 <a href="/">HOME</a>
                 <a href="about.html">ABOUT</a>
-                <a href="food.html">Food</a>
+                <a href="/foods/">Food</a>
                 <a href="/profile/">Profile</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'logout' %}">Logout</a>
@@ -89,7 +89,11 @@ slider_section #carouselExampleIndicators {
           <div class=" col-md-5 offset-md-1">
             <div class="detail-box">
               <h2 style="text-transform: capitalize;">
-                {{ user.first_name }} {{ user.last_name }}
+                      {% if  user.first_name %}
+                        {{  user.first_name }} {{ user.last_name }}
+                      {% else %}
+                        {{  user }}
+                      {% endif %}
               </h2>
               <div style="display:flex;margin-top:1rem;">
                 <div class="" style="height:1rem;font-size: smaller;padding-right: 1rem;">
@@ -97,7 +101,11 @@ slider_section #carouselExampleIndicators {
                   </div>
                   <div>
                     <h6>
-                        {{user.email}}
+                      {% if user.email %}
+                        {{ user.email }}
+                      {% else %}
+                        -
+                      {% endif %}
                       </h6>
                   </div>
               </div>
@@ -107,7 +115,11 @@ slider_section #carouselExampleIndicators {
                   </div>
                   <div>
                     <h6>
+                      {% if user.profile.address %}
+                        {{ user.profile.address }}
+                      {% else %}
                         Union PLace, Colombo
+                      {% endif %}
                       </h6>
                   </div>
               </div>
@@ -117,13 +129,17 @@ slider_section #carouselExampleIndicators {
                   </div>
                   <div>
                     <h6>
+                     {% if user.profile.contact %}
+                        {{ user.profile.contact }}
+                      {% else %}
                         077 2316543
+                      {% endif %}
                       </h6>
                   </div>
               </div>
 
               <div class="btn-box">
-                <a href="" class="btn-1">
+                <a href="/profile/update/" class="btn-1">
                   Update Profile
                 </a>
                 <a href="" class="btn-2">

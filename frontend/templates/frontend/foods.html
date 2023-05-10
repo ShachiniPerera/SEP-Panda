@@ -1,0 +1,760 @@
+{% extends 'frontend/base.html' %}
+{% load custom_filters %}
+{% load static %}
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<style>
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 130px;
+  margin: 0 auto;
+}
+
+.quantity-input {
+  text-align: center;
+  width: 40px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  color: #555;
+}
+
+.decrement-btn,
+.increment-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background-color: #ddd;
+  color: #555;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.increment-btn:hover,
+.decrement-btn:hover {
+  background-color: #555;
+  color: #fff;
+}
+
+
+.floating-cart {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  line-height: 50px;
+  font-size: 24px;
+  color: #333;
+  z-index: 9999;
+  transition: all 0.3s ease-in-out;
+}
+
+.floating-cart:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.cart-count {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #333;
+  color: #fff;
+  font-size: 12px;
+  line-height: 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  text-align: center;
+}
+
+</style>
+
+<a href="#" class="floating-cart" id="floating-cart">
+  <i class="fa fa-shopping-cart"></i>
+  <span class="cart-count">0</span>
+</a>
+
+<!-- Modal -->
+<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cartModalLabel">Your Cart</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+<div class="modal-body">
+  <!-- {{order_details_cart}} -->
+  {% if order_details_cart %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Status</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order_details_cart %}
+          <tr>
+            <td>{{ item.menu_item }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.order.status }}</td>
+            <td>{{ item.subtotal }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2"><strong>Total:</strong></td>
+          <td></td>
+          <td><strong>{{ order_details_cart|total_price }}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  {% else %}
+    <p>Your cart is empty.</p>
+  {% endif %}
+</div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Make Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalLabel">
+  <div class="modal-dialog" role="document">
+    {% if user.is_authenticated %}
+    <div class="modal-content">
+    <div class="alert alert-success" role="alert" id="orderSuccessAlert" style="display:none;">
+      Order placed successfully!
+    </div>
+      <div class="modal-header">
+        <h4 class="modal-title" id="orderModalLabel"></h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <img src="" id="orderModalImage" class="img-fluid">
+          </div>
+          <div class="col-md-6">
+            <!-- <div class="form-group" sty>
+              <label for="orderModalId">ID:</label> -->
+              <input type="text" class="form-control" id="orderModalId" readonly hidden>
+            <!-- </div> -->
+            <div class="form-group">
+              <label for="orderModalName">Name:</label>
+              <input type="text" class="form-control" id="orderModalName" readonly>
+            </div>
+            <div class="form-group">
+              <label for="orderModalPrice">Item Price:</label>
+              <input type="text" class="form-control" id="orderModalPrice" readonly>
+            </div>
+            <div class="form-group">
+              <label for="orderModalQty">Quantity:</label>
+              <div class="input-group">
+                <button type="button" class="decrement-btn" data-field="orderModalQty">-</button>
+                <input type="number" id="orderModalQty" name="orderModalQty" class="quantity-input" value="1" min="1" max="100">
+                <button type="button" class="increment-btn" data-field="orderModalQty">+</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="orderModalTotalPrice">Total Price:</label>
+              <input type="text" class="form-control" id="orderModalTotalPrice" readonly>
+            </div>
+            <div class="form-group">
+              <label for="orderModalAddress">Delivery Address:</label>
+              <textarea class="form-control" id="orderModalAddress"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="orderModalAddToCart">Add to Cart</button>
+      </div>
+    </div>
+    {% else %}
+    <div class="modal-content">
+      <div class="modal-body">
+        <p>Please log in to place an order.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <a href="{% url 'login' %}" class="btn btn-primary">Log In</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+
+<div class="hero_area">
+    <!-- header section strats -->
+    <header class="header_section">
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg custom_nav-container">
+          <a class="navbar-brand" href="/">
+            <img src="images/logo.png" alt="" />
+            <span>
+              Panda
+            </span>
+          </a>
+
+          <div class="navbar-collapse" id="">
+            <div class="custom_menu-btn">
+              <button onclick="openNav()">
+                <span class="s-1"> </span>
+                <span class="s-2"> </span>
+                <span class="s-3"> </span>
+              </button>
+            </div>
+            <div id="myNav" class="overlay">
+              <div class="overlay-content">
+                <a href="/">HOME</a>
+                <a href="about.html">ABOUT</a>
+                <a href="/foods/">Food</a>
+                <a href="/profile/">Profile</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <!-- end header section -->
+
+    <!-- slider section -->
+    <section class=" slider_section position-relative">
+      <div class="side_heading">
+        <h5>
+          G
+          o
+          o
+          d
+          F
+          o
+          o
+          d
+        </h5>
+      </div>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-3 col-md-4 offset-md-1" style="background: transparent !important;">
+            <div id="carouselExampleIndicators" class="carousel slide " data-ride="carousel">
+              <ol class="carousel-indicators">
+                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active">
+                  01
+                </li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="1">
+                  02
+                </li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="2">
+                  03
+                </li>
+                <li data-target="#carouselExampleIndicators" data-slide-to="3">
+                  04
+                </li>
+              </ol>
+              <div class="carousel-inner">
+                <div class="carousel-item active">
+                  <div class="img-box b-1">
+                    <img src="https://www.freepnglogos.com/uploads/food-png/food-grass-fed-beef-foodservice-products-grass-run-farms-4.png" alt="" />
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <div class="img-box b-2">
+                    <img src="https://www.freepnglogos.com/uploads/food-png/food-indian-take-away-the-amantola-39.png" alt="" />
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <div class="img-box b-3">
+                    <img src="https://www.freepnglogos.com/uploads/food-png/food-sutherland-foodservice-12.png" alt="" />
+                  </div>
+                </div>
+                <div class="carousel-item">
+                  <div class="img-box b-4">
+                    <img src="https://www.freepnglogos.com/uploads/food-png/true-food-kitchen-35.png" alt="" />
+                  </div>
+                </div>
+              </div>
+              <div class="carousel_btn-box">
+                <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                  <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                  <span class="sr-only">Next</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class=" col-md-5 offset-md-1">
+             <div class="detail-box">
+              <h1>
+                Menu
+              </h1>
+              <p>
+                Explore and order from our extensive menu filled with a diverse selection of delicious and mouth-watering dishes to satisfy your cravings.
+              </p>
+
+<div class="container">
+  <div class="row">
+    <div class="">
+      <h3 class="mb-4">Our Main Categories of Foods</h3>
+      <ul class="list-group">
+        <li class="list-group-item">Appetizers</li>
+        <li class="list-group-item">Salads</li>
+        <li class="list-group-item">Soups</li>
+        <li class="list-group-item">Entrees</li>
+        <li class="list-group-item">Desserts</li>
+        <li class="list-group-item">Beverages</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- end slider section -->
+  </div>
+
+
+      <div class="container mb-5" data-aos="fade-up">
+
+        <div class="tab-content" data-aos="fade-up" data-aos-delay="300">
+
+          <div class="tab-pane fade active show" id="menu-starters">
+
+            <div class="tab-header text-center pb-5">
+              <h3>Starters</h3>
+            </div>
+
+            <div class="row gy-5">
+            {% for item in menus %}
+              <div class="col-lg-4 menu-item">
+                <img src="{{ item.image.url }}"  class="menu-img img-fluid" alt="" style="max-height: 10rem;">
+                <h4>{{ item.name }}</h4>
+                <p class="ingredients">
+                  {{ item.description }}
+                </p>
+                <p class="price">
+                  ${{ item.price }}
+                </p>
+            <a class="btn btn-dark" href="#" data-toggle="modal" data-target="#orderModal" data-id="{{ item.id }}" data-name="{{ item.name }}" data-image="{{ item.image.url }}" data-price="{{ item.price }}">
+                Order Now
+            </a>
+              </div><!-- Menu Item -->
+            {% endfor %}
+
+            </div>
+          </div><!-- End Starter Menu Content -->
+
+        </div>
+
+        <div class="tab-content pt-5 mt-3" data-aos="fade-up" data-aos-delay="300">
+
+          <div class="tab-pane fade active show" id="menu-starters">
+
+            <div class="tab-header text-center pb-5">
+              <h3>Appetizers</h3>
+            </div>
+
+            <div class="row gy-5">
+            {% for item in menus %}
+              <div class="col-lg-4 menu-item">
+                <img src="{{ item.image.url }}"  class="menu-img img-fluid" alt="" style="max-height: 10rem;">
+                <h4>{{ item.name }}</h4>
+                <p class="ingredients">
+                  {{ item.description }}
+                </p>
+                <p class="price">
+                  ${{ item.price }}
+                </p>
+            <a class="btn btn-dark" href="#" data-toggle="modal" data-target="#orderModal" data-id="{{ item.id }}" data-name="{{ item.name }}" data-image="{{ item.image.url }}" data-price="{{ item.price }}">
+                Order Now
+            </a>
+              </div><!-- Menu Item -->
+            {% endfor %}
+
+            </div>
+          </div><!-- End Starter Menu Content -->
+
+        </div>
+
+
+        <div class="tab-content pt-5 mt-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="tab-pane fade active show" id="menu-starters">
+            <div class="tab-header text-center pb-5">
+              <h3>Salads</h3>
+            </div>
+            <div class="row gy-5">
+            {% for item in menus %}
+              <div class="col-lg-4 menu-item">
+                <img src="{{ item.image.url }}"  class="menu-img img-fluid" alt="" style="max-height: 10rem;">
+                <h4>{{ item.name }}</h4>
+                <p class="ingredients">
+                  {{ item.description }}
+                </p>
+                <p class="price">
+                  ${{ item.price }}
+                </p>
+            <a class="btn btn-dark" href="#" data-toggle="modal" data-target="#orderModal" data-id="{{ item.id }}" data-name="{{ item.name }}" data-image="{{ item.image.url }}" data-price="{{ item.price }}">
+                Order Now
+            </a>
+              </div><!-- Menu Item -->
+            {% endfor %}
+
+            </div>
+          </div><!-- End Starter Menu Content -->
+        </div>
+
+        <div class="tab-content pt-5 mt-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="tab-pane fade active show" id="menu-starters">
+            <div class="tab-header text-center pb-5">
+              <h3>Soups</h3>
+            </div>
+            <div class="row gy-5">
+            {% for item in menus %}
+              <div class="col-lg-4 menu-item">
+                <img src="{{ item.image.url }}"  class="menu-img img-fluid" alt="" style="max-height: 10rem;">
+                <h4>{{ item.name }}</h4>
+                <p class="ingredients">
+                  {{ item.description }}
+                </p>
+                <p class="price">
+                  ${{ item.price }}
+                </p>
+            <a class="btn btn-dark" href="#" data-toggle="modal" data-target="#orderModal" data-id="{{ item.id }}" data-name="{{ item.name }}" data-image="{{ item.image.url }}" data-price="{{ item.price }}">
+                Order Now
+            </a>
+              </div><!-- Menu Item -->
+            {% endfor %}
+
+            </div>
+          </div><!-- End Starter Menu Content -->
+        </div>
+
+        <div class="tab-content pt-5 mt-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="tab-pane fade active show" id="menu-starters">
+            <div class="tab-header text-center pb-5">
+              <h3>Desserts</h3>
+            </div>
+            <div class="row gy-5">
+            {% for item in menus %}
+              <div class="col-lg-4 menu-item">
+                <img src="{{ item.image.url }}"  class="menu-img img-fluid" alt="" style="max-height: 10rem;">
+                <h4>{{ item.name }}</h4>
+                <p class="ingredients">
+                  {{ item.description }}
+                </p>
+                <p class="price">
+                  ${{ item.price }}
+                </p>
+            <a class="btn btn-dark" href="#" data-toggle="modal" data-target="#orderModal" data-id="{{ item.id }}" data-name="{{ item.name }}" data-image="{{ item.image.url }}" data-price="{{ item.price }}">
+                Order Now
+            </a>
+              </div><!-- Menu Item -->
+            {% endfor %}
+
+            </div>
+          </div><!-- End Starter Menu Content -->
+        </div>
+
+        <div class="tab-content pt-5 mt-3" data-aos="fade-up" data-aos-delay="300">
+          <div class="tab-pane fade active show" id="menu-starters">
+            <div class="tab-header text-center pb-5">
+              <h3>Beverages</h3>
+            </div>
+            <div class="row gy-5">
+            {% for item in menus %}
+              <div class="col-lg-4 menu-item">
+                <img src="{{ item.image.url }}"  class="menu-img img-fluid" alt="" style="max-height: 10rem;">
+                <h4>{{ item.name }}</h4>
+                <p class="ingredients">
+                  {{ item.description }}
+                </p>
+                <p class="price">
+                  ${{ item.price }}
+                </p>
+            <a class="btn btn-dark" href="#" data-toggle="modal" data-target="#orderModal" data-id="{{ item.id }}" data-name="{{ item.name }}" data-image="{{ item.image.url }}" data-price="{{ item.price }}">
+                Order Now
+            </a>
+              </div><!-- Menu Item -->
+            {% endfor %}
+
+            </div>
+          </div><!-- End Starter Menu Content -->
+        </div>
+
+      </div>
+
+
+<script>
+  const floatingCart = document.querySelector('#floating-cart');
+  floatingCart.addEventListener('click', function() {
+    const modal = new bootstrap.Modal(document.getElementById('cartModal'));
+    modal.show();
+  });
+</script>
+
+  <script>
+    const orderBtn = document.querySelector('#orderBtn');
+    orderBtn.addEventListener('click', function() {
+      if (!{{ user.is_authenticated }}) {
+        $('#orderModal').modal('show');
+        event.preventDefault();
+      }
+    });
+  </script>
+
+  <script>
+    const cartCountElement = document.querySelector('.cart-count');
+    const cartItemsCount = '{{ cart_items|default:0 }}';
+    
+    cartCountElement.textContent = cartItemsCount;
+  </script>
+
+<script>
+// Handle Order Now button click
+$(document).on('click', '[data-toggle="modal"]', function() {
+  var itemId = $(this).data('id'); // Get the ID of the selected item
+  var itemName = $(this).data('name'); // Get the name of the selected item
+  var itemImage = $(this).data('image'); // Get the image of the selected item
+  var itemPrice = $(this).data('price'); // Get the price of the selected item
+  // Populate the modal with the item data
+  $('#orderModalId').val(itemId);
+  $('#orderModalLabel').text(itemName);
+  $('#orderModalImage').attr('src', itemImage);
+  $('#orderModalName').val(itemName);
+  $('#orderModalPrice').val('$' + itemPrice);
+  $('#orderModalQty').val(1);
+  $('#orderModalAddress').val('');
+});
+
+// Handle Add to Cart button click
+$(document).on('click', '#orderModalAddToCart', function() {
+  // Get the values from the form
+  const name = $('#orderModalName').val();
+  const id = $('#orderModalId').val();
+  const price = $('#orderModalPrice').val();
+  const qty = $('#orderModalQty').val();
+  const totalPrice = $('#orderModalTotalPrice').val();
+  const address = $('#orderModalAddress').val();
+
+  // Send the cart data to the server via AJAX
+  $.ajax({
+    url: '/order/add_to_cart',
+    method: 'POST',
+    data: JSON.stringify({ id, name, price, qty, totalPrice, address }),
+    contentType: 'application/json',
+    success: function(response) {
+      // Show the success message
+      $('#orderSuccessAlert').show();
+
+      // Hide the success message after 3 seconds
+      setTimeout(function() {
+        $('#orderSuccessAlert').hide();
+        $('#orderModal').modal('hide');
+        location.reload(true);
+      }, 2000);
+      
+      // Clear the cartItems array and update the cart badge and total
+      cartItems = [];
+      updateCart();
+
+    },
+    error: function() {
+          // Remove the popup message
+      alert("Something went wrong!!!")
+    }
+  });
+  
+});
+
+$(document).on('click', '.increment-btn, .decrement-btn', function() {
+  var field = $(this).data('field');
+  var input = $('input[name=' + field + ']');
+  var value = parseInt(input.val());
+  if ($(this).hasClass('increment-btn')) {
+    value = value + 1;
+  } else {
+    value = value - 1;
+    if (value < 1) {
+      value = 1;
+    }
+  }
+  input.val(value);
+});
+
+// Handle Quantity input change
+$(document).on('change', '.input-number', function() {
+  var minValue = parseInt($(this).attr('min'));
+  var maxValue = parseInt($(this).attr('max'));
+  var valueCurrent = parseInt($(this).val());
+  
+  if(valueCurrent >= minValue) {
+    $('.btn-number[data-type="minus"][data-field="' + $(this).attr('id') + '"]').removeAttr('disabled');
+  } else {
+    alert('Sorry, the minimum value was reached');
+    $(this).val($(this).data('oldValue'));
+  }
+  
+  if(valueCurrent <= maxValue) {
+    $('.btn-number[data-type="plus"][data-field="' + $(this).attr('id') + '"]').removeAttr('disabled');
+  } else {
+    alert('Sorry, the maximum value was reached');
+    $(this).val($(this).data('oldValue'));
+  }
+});
+
+// Handle Quantity button click
+$(document).on('click', '.btn-number', function(e) {
+  e.preventDefault();
+  
+  var fieldName = $(this).attr('data-field');
+  var type = $(this).attr('data-type');
+  var input = $('input[name="' + fieldName + '"]');
+  var currentValue = parseInt(input.val());
+  
+  if(!isNaN(currentValue)) {
+    if(type == 'minus') {
+      if(currentValue > input.attr('min')) {
+        input.val(currentValue - 1).change();
+      }
+      if(parseInt(input.val()) == input.attr('min')) {
+        $(this).attr('disabled', true);
+      }
+    } else if(type == 'plus') {
+      if(currentValue < input.attr('max')) {
+        input.val(currentValue + 1).change();
+      }
+      if(parseInt(input.val()) == input.attr('max')) {
+                $(this).attr('disabled', true);
+      }
+    }
+  } else {
+    input.val(0);
+  }
+});
+
+// Update the cart badge and total
+function updateCart() {
+  var total = 0;
+  var count = cartItems.length;
+  
+  for(var i = 0; i < cartItems.length; i++) {
+    total += (cartItems[i].price * cartItems[i].qty);
+  }
+  
+  $('#cartBadge').text(count);
+  $('#cartTotal').text('$' + total.toFixed(2));
+}
+
+// Handle Checkout button click
+$(document).on('click', '#checkoutBtn', function() {
+  // Check if there are any items in the cart
+  if(cartItems.length == 0) {
+    alert('Your cart is empty!');
+    return;
+  }
+  
+  // Send the cart data to the server via AJAX
+  $.ajax({
+    url: '/checkout/',
+    method: 'POST',
+    data: JSON.stringify(cartItems),
+    contentType: 'application/json',
+    success: function(response) {
+      alert('Order placed successfully!');
+      
+      // Clear the cartItems array and update the cart badge and total
+      cartItems = [];
+      updateCart();
+    },
+    error: function() {
+      alert('Something went wrong, please try again later.');
+    }
+  });
+});
+
+// Initialize the Quantity input and button
+$('.input-number').each(function() {
+  var minValue = parseInt($(this).attr('min'));
+  var maxValue = parseInt($(this).attr('max'));
+  var valueCurrent = parseInt($(this).val());
+  var name = $(this).attr('name');
+  
+  if(valueCurrent >= minValue) {
+    $('.btn-number[data-type="minus"][data-field="' + name + '"]').removeAttr('disabled');
+  } else {
+    $(this).val(minValue);
+  }
+  if(valueCurrent <= maxValue) {
+    $('.btn-number[data-type="plus"][data-field="' + name + '"]').removeAttr('disabled');
+  } else {
+    $(this).val(maxValue);
+  }
+});
+
+// Initialize the cart badge and total
+updateCart();
+
+
+</script>
+
+<script>
+// Get the relevant elements from the DOM
+const qtyInput = document.getElementById('orderModalQty');
+const priceInput = document.getElementById('orderModalPrice');
+const totalPriceInput = document.getElementById('orderModalTotalPrice');
+const incrementBtn = document.querySelector('.increment-btn');
+const decrementBtn = document.querySelector('.decrement-btn');
+
+// Update the total price based on the quantity and item price
+function updateTotalPrice() {
+  const qty = parseFloat(qtyInput.value);
+  const price = parseFloat(priceInput.value.replace('$', ''));
+  const totalPrice = qty * price;
+  totalPriceInput.value = totalPrice.toFixed(2);
+}
+
+// Add event listeners to the quantity input to update the total price when it changes
+qtyInput.addEventListener('change', updateTotalPrice);
+qtyInput.addEventListener('keyup', updateTotalPrice);
+
+// Add event listeners to the increment and decrement buttons to update the total price
+incrementBtn.addEventListener('click', updateTotalPrice);
+decrementBtn.addEventListener('click', updateTotalPrice);
+
+</script>
+
+{% endblock %}

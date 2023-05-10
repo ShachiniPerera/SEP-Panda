@@ -28,9 +28,16 @@ class HomeView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['menus'] = Menu.objects.all()
+        context['menus'] = Menu.objects.filter(specials=True)
         return context
 
+class FoodView(TemplateView):
+    template_name = "frontend/foods.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['menus'] = Menu.objects.all()
+        return context
 
 @login_required
 def profile(request):
