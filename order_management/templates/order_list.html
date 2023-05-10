@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<div class="px-4 py-4 mx-4 my-4 rounded-3xl bg-gray-100 min-h-full">
+    <table class="min-w-full divide-y divide-gray-200 mt-5">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Price</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Address</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated At</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for order in orders %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order.customer.username }}</td>
+                    {% if order.status == 'waiting' %}
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <select name="status" class="status-select" data-order-id="{{ order.id }}">
+                            <option value="waiting" selected>Waiting</option>
+                            <option value="in_progress">In Progress</option>
+                        </select>
+                    </td>
+                    {% elif order.status == 'in_progress' %}
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <select name="status" class="status-select" data-order-id="{{ order.id }}">
+                            <option value="in_progress" selected>In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </td>
+                    {% elif order.status == 'completed' %}
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order.status }}</td>
+                    {% endif %}
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order.total_price }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order.delivery_address }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order.created_at }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order.updated_at }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">No orders found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+  </table>
+</div>
+
+<script>
+$(document).ready(function() {
+  $(".status-select").change(function() {
+    var orderId = $(this).data("order-id");
+    var newStatus = $(this).val();
+    $.ajax({
+      url: "{% url 'update_status' %}",
+      method: "POST",
+      data: {
+        csrfmiddlewaretoken: "{{ csrf_token }}",
+        order_id: orderId,
+        new_status: newStatus
+      },
+      success: function(response) {
+        // Handle success response
+        if (response.success) {
+          // Display success message
+          var message = $('<div class="alert alert-success" role="alert">Status updated successfully!</div>');
+          $(".container").prepend(message);
+          setTimeout(function() {
+            message.remove();
+            location.reload();
+          }, 2000);
+        } else {
+          // Display error message
+          var message = $('<div class="alert alert-danger" role="alert">Error updating status!</div>');
+          $(".container").prepend(message);
+          setTimeout(function() {
+            message.remove();
+            location.reload();
+          }, 2000);
+        }
+      },
+      error: function(response) {
+        // Handle error response
+        var message = $('<div class="alert alert-danger" role="alert">Error updating status!</div>');
+        $(".container").prepend(message);
+        setTimeout(function() {
+          message.remove();
+          location.reload();
+        }, 2000);
+      }
+    });
+  });
+});
+</script>
+
+
+{% endblock %}
