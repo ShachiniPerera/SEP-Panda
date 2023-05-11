@@ -44,7 +44,7 @@ slider_section #carouselExampleIndicators {
             <div id="myNav" class="overlay">
               <div class="overlay-content">
                 <a href="/">HOME</a>
-                <a href="about.html">ABOUT</a>
+                <a href="/about/">ABOUT</a>
                 <a href="/foods/">Food</a>
                 <a href="/profile/">Profile</a>
                 {% if user.is_authenticated %}
@@ -142,7 +142,7 @@ slider_section #carouselExampleIndicators {
                 <a href="/profile/update/" class="btn-1">
                   Update Profile
                 </a>
-                <a href="" class="btn-2">
+                <a href="{% url 'orders' %}" class="btn-2">
                   View Orders
                 </a>
               </div>

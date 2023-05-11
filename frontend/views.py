@@ -1,5 +1,6 @@
 from django.views.generic import TemplateView
 from menu.models import Menu
+from order_management.models import Order
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 
@@ -30,6 +31,29 @@ class HomeView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['menus'] = Menu.objects.filter(specials=True)
         return context
+    
+class PaymentView(TemplateView):
+    template_name = "frontend/payment.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = Order.objects.get(id=1)
+        order_items = order.orderitem_set.all()  # get all OrderItem objects for the Order
+        total_amount = sum(item.subtotal() for item in order_items)  # calculate the total amount
+        context['total_amount'] = total_amount
+        print(total_amount)
+        return context
+    
+class OrderView(TemplateView):
+    template_name = "frontend/orders.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['orders'] = Order.objects.all()
+        return context
+    
+class AboutView(TemplateView):
+    template_name = "frontend/about.html"
 
 class FoodView(TemplateView):
     template_name = "frontend/foods.html"

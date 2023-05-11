@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'frontend',
     'order_management',
     'hr_management',
+    'payment_and_delivery',
 ]
 
 MIDDLEWARE = [

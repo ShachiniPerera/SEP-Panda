@@ -136,7 +136,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Make Payment</button>
+        <button type="button" class="btn btn-primary" onclick="redirectToPayment({{order_details_cart.first.order.id}})">Make Payment</button>
       </div>
     </div>
   </div>
@@ -166,7 +166,7 @@
             <div id="myNav" class="overlay">
               <div class="overlay-content">
                 <a href="/">HOME</a>
-                <a href="about.html">ABOUT</a>
+                <a href="/about/">ABOUT</a>
                 <a href="/foods/">Food</a>
                 <a href="/profile/">Profile</a>
                 {% if user.is_authenticated %}
@@ -259,7 +259,7 @@
                 <a href="#contact-us" class="btn-1">
                   Contact Us
                 </a>
-                <a href="" class="btn-2">
+                <a href="{% url 'foods' %}" class="btn-2">
                   Order Now
                 </a>
               </div>
@@ -289,8 +289,8 @@
             <p>
               Our restaurant offers a wide variety of delicious and authentic dishes that are sure to satisfy your cravings. From mouth-watering appetizers to flavorful entrees, our menu features fresh ingredients and bold flavors that will leave you wanting more.
             </p>
-            <a href="">
-              Read More
+            <a href="{% url 'foods'  %}">
+              Explore
             </a>
           </div>
         </div>
@@ -339,8 +339,8 @@
             <p>
               Our food dishes are carefully crafted with the freshest and highest quality ingredients. Each dish is prepared with precision and attention to detail to ensure a delectable and satisfying culinary experience.
             </p>
-            <a href="">
-              Read More
+            <a href="{% url 'foods'  %}">
+              Order Now
             </a>
           </div>
         </div>
@@ -973,5 +973,14 @@ decrementBtn.addEventListener('click', updateTotalPrice);
 
 </script>
 
+<script>
+function redirectToPayment(id) {
+  // Get the order ID from the server-side code
+  var orderId = id;
+  
+  // // Redirect the customer to the payment page with the order ID as a parameter
+  window.location.href = '/payment?order_id=' + orderId;
+}
+</script>
 
 {% endblock %}
